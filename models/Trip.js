@@ -6,6 +6,7 @@ const tripSchema = new mongoose.Schema({
     required: true,
   },
   description: String,
+
   startDate: {
     type: Date,
     required: true,
@@ -14,17 +15,31 @@ const tripSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  duration: Number, 
+  duration: Number,
+
   status: {
     type: String,
     enum: ['planned', 'active', 'completed', 'cancelled'],
     default: 'planned',
   },
+
+  guests: {
+    adults: {
+      type: Number,
+      default: 1,
+    },
+    children: {
+      type: Number,
+      default: 0,
+    },
+  },
+
   destination: {
     name: String,
     country: String,
     city: String,
   },
+
   travelers: [
     {
       userId: {
@@ -38,6 +53,7 @@ const tripSchema = new mongoose.Schema({
       },
     },
   ],
+
   itinerary: [
     {
       date: Date,
@@ -51,6 +67,7 @@ const tripSchema = new mongoose.Schema({
       ],
     },
   ],
+
   budget: {
     totalBudget: Number,
     currency: String,
@@ -62,12 +79,14 @@ const tripSchema = new mongoose.Schema({
       },
     ],
   },
+
   transportation: [
     {
       type: String,
-      details: Object, // Flexible for flight numbers, train times, etc.
+      details: Object,
     },
   ],
+
   accommodation: [
     {
       name: String,
@@ -77,17 +96,45 @@ const tripSchema = new mongoose.Schema({
       location: String,
     },
   ],
+
+  facilities: [
+    {
+      type: String,
+      enum: [
+        'Public Space',
+        'AC',
+        '24/7',
+        'TV',
+        'Refrigerator',
+        'Seating Area',
+        'Free Wifi',
+      ],
+    },
+  ],
+
+  instantBook: {
+    type: Boolean,
+    default: false,
+  },
+
+  rating: {
+    type: Number,
+    min: 1,
+    max: 5,
+    default: 5,
+  },
+
   notes: String,
+
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   },
 },
 {
-  timestamps: true, // Adds createdAt and updatedAt fields automatically
+  timestamps: true,
 });
 
-// Pre-save hook to calculate duration
 tripSchema.pre('save', function (next) {
   if (this.startDate && this.endDate) {
     const diffTime = Math.abs(this.endDate.getTime() - this.startDate.getTime());

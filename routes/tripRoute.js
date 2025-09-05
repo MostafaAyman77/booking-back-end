@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const tripController = require("../Controllers/tripController");
+const { filterTrips, createTrip, getTrip, getTrips, updateTrip, deleteTrip } = require("../Controllers/tripController");
 
 const authController = require("../Controllers/authController");
 
@@ -11,10 +11,11 @@ const {
   deleteTripValidator
 } = require('../utils/validators/tripValidator');
 
-router.post('/', createTripValidator, authController.protect, authController.allowed("admin"), tripController.createTrip);
-router.get('/', tripController.getTrips);
-router.get('/:id', getTripValidator, tripController.getTrip);
-router.put('/:id', updateTripValidator, tripController.updateTrip);
-router.delete('/:id', deleteTripValidator, tripController.deleteTrip);
+router.post('/', createTripValidator, authController.protect, createTrip);
+router.get('/', getTrips);
+router.get('/:id', getTripValidator, getTrip);
+router.put('/:id', updateTripValidator, updateTrip);
+router.delete('/:id', deleteTripValidator, deleteTrip);
+router.get("/filter", filterTrips);
 
 module.exports = router

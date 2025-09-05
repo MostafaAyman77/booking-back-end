@@ -1,0 +1,18 @@
+{
+  "welcome": "Hello Admin Updated!",
+  "login": "Login",
+  "logout": "Logout",
+  "register": "Register",
+  "username": "Username",
+  "password": "Password",
+  "email": "Email",
+  "profile": "Profile",
+  "settings": "Settings",
+  "language": "Language",
+  "english": "English",
+  "spanish": "Spanish",
+  "french": "French",
+  "german": "German",
+  "chinese": "Chinese",
+  "newKey": "This was added by admin"
+}
