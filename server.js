@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 const morgan = require("morgan");
 const cors = require("cors");
 
-require('dotenv').config();
+require("dotenv").config();
 
 const ApiError = require("./utils/apiError");
 const globalError = require("./middlewares/errorMiddleware");
@@ -20,7 +20,7 @@ const app = express();
 app.use(cors());
 
 // Middleware
-app.use(express.json({ limit: '20kb' }));
+app.use(express.json({ limit: "20kb" }));
 // app.use(cookieParser());
 
 if (process.env.NODE_ENV === "development") {
@@ -46,9 +46,9 @@ const server = app.listen(PORT, () => {
 
 // Handle rejection outside express
 process.on("unhandledRejection", (err) => {
-    console.error(`unhandledRejection Errors: ${err.name} | ${err.message}`);
-    server.close(() => {
-        console.error(`Shutting down.....`);
-        process.exit(1);
-    });
+  console.error(`unhandledRejection Errors: ${err.name} | ${err.message}`);
+  server.close(() => {
+    console.error(`Shutting down.....`);
+    process.exit(1);
+  });
 });

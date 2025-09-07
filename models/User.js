@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: [true, "User name required"],
+      minlength: [2, "Too short name"],
+      maxlength: [100, "Too long name"],
     },
     slug: {
       type: String,
@@ -17,6 +19,7 @@ const userSchema = new mongoose.Schema(
       required: [true, "User email required"],
       unique: true,
       lowercase: true,
+      index: true,
     },
     password: {
       type: String,
@@ -31,14 +34,30 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["user", "manager", "admin", "Organizer"],
       default: "user",
+      index: true,
     },
+    active: { type: Boolean, default: true },
+    profileImg: { type: String },
+    phone: { type: String },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+      versionKey: false,
+      transform: function (doc, ret) {
+        delete ret.password;
+        return ret;
+      },
+    },
+    toObject: { virtuals: true, versionKey: false },
+  }
 );
+
+userSchema.index({ createdAt: -1 });
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-  // Hashing user password
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });

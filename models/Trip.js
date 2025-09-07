@@ -1,148 +1,122 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const tripSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  description: String,
+const tripSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    description: { type: String },
 
-  startDate: {
-    type: Date,
-    required: true,
-  },
-  endDate: {
-    type: Date,
-    required: true,
-  },
-  duration: Number,
+    startDate: { type: Date, required: true },
+    endDate: { type: Date, required: true },
+    duration: { type: Number },
 
-  status: {
-    type: String,
-    enum: ['planned', 'active', 'completed', 'cancelled'],
-    default: 'planned',
-  },
-
-  guests: {
-    adults: {
-      type: Number,
-      default: 1,
+    status: {
+      type: String,
+      enum: ["planned", "active", "completed", "cancelled"],
+      default: "planned",
+      index: true,
     },
-    children: {
-      type: Number,
-      default: 0,
+
+    guests: {
+      adults: { type: Number, default: 1, min: 1 },
+      children: { type: Number, default: 0, min: 0 },
     },
-  },
 
-  destination: {
-    name: String,
-    country: String,
-    city: String,
-  },
+    destination: {
+      name: { type: String },
+      country: { type: String, index: true },
+      city: { type: String, index: true },
+    },
 
-  travelers: [
-    {
-      userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+    travelers: [
+      {
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        role: { type: String, enum: ["organizer", "user"], default: "user" },
       },
-      role: {
-        type: String,
-        enum: ['organizer', 'user'],
-        default: 'user',
-      },
-    },
-  ],
+    ],
 
-  itinerary: [
-    {
-      date: Date,
-      activities: [
+    itinerary: [
+      {
+        date: { type: Date },
+        activities: [
+          {
+            name: { type: String },
+            time: { type: String },
+            location: { type: String },
+            description: { type: String },
+          },
+        ],
+      },
+    ],
+
+    budget: {
+      totalBudget: { type: Number, min: 0 },
+      currency: { type: String },
+      expenses: [
         {
-          name: String,
-          time: String,
-          location: String,
-          description: String,
+          category: { type: String },
+          amount: { type: Number, min: 0 },
+          description: { type: String },
         },
       ],
     },
-  ],
 
-  budget: {
-    totalBudget: Number,
-    currency: String,
-    expenses: [
+    transportation: [
       {
-        category: String,
-        amount: Number,
-        description: String,
+        type: { type: String },
+        details: { type: Object },
       },
     ],
+
+    accommodation: [
+      {
+        name: { type: String },
+        type: { type: String },
+        checkInDate: { type: Date },
+        checkOutDate: { type: Date },
+        location: { type: String },
+      },
+    ],
+
+    facilities: [
+      {
+        type: String,
+        enum: [
+          "Public Space",
+          "AC",
+          "24/7",
+          "TV",
+          "Refrigerator",
+          "Seating Area",
+          "Free Wifi",
+        ],
+      },
+    ],
+
+    instantBook: { type: Boolean, default: false },
+
+    rating: { type: Number, min: 1, max: 5, default: 5 },
+
+    notes: { type: String },
+
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
+  { timestamps: true }
+);
 
-  transportation: [
-    {
-      type: String,
-      details: Object,
-    },
-  ],
+tripSchema.index({ status: 1, startDate: 1 });
+tripSchema.index({ "destination.city": 1, startDate: 1 });
+tripSchema.index({ createdAt: -1 });
 
-  accommodation: [
-    {
-      name: String,
-      type: String,
-      checkInDate: Date,
-      checkOutDate: Date,
-      location: String,
-    },
-  ],
-
-  facilities: [
-    {
-      type: String,
-      enum: [
-        'Public Space',
-        'AC',
-        '24/7',
-        'TV',
-        'Refrigerator',
-        'Seating Area',
-        'Free Wifi',
-      ],
-    },
-  ],
-
-  instantBook: {
-    type: Boolean,
-    default: false,
-  },
-
-  rating: {
-    type: Number,
-    min: 1,
-    max: 5,
-    default: 5,
-  },
-
-  notes: String,
-
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  },
-},
-{
-  timestamps: true,
-});
-
-tripSchema.pre('save', function (next) {
+tripSchema.pre("save", function (next) {
   if (this.startDate && this.endDate) {
-    const diffTime = Math.abs(this.endDate.getTime() - this.startDate.getTime());
+    const diffTime = Math.abs(
+      this.endDate.getTime() - this.startDate.getTime()
+    );
     this.duration = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   }
   next();
 });
 
-const Trip = mongoose.model('Trip', tripSchema);
+const Trip = mongoose.model("Trip", tripSchema);
 
 module.exports = Trip;
