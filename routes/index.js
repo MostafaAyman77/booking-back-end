@@ -3,6 +3,7 @@ const userRoute = require("./userRoute");
 const authRoute = require("./authRoute");
 const tripRoute = require("./tripRoute");
 const langRoute = require("./langRoute");
+const reviewRoute = require("./reviewRoutes");
 
 const mountRoutes = (app) => {
 
@@ -10,6 +11,7 @@ const mountRoutes = (app) => {
   app.use("/api/users", userRoute);
   app.use("/api/trips", tripRoute);
   app.use("/api/lang", langRoute);
+  app.use("/api/reviews", reviewRoute);
 };
 
 module.exports = mountRoutes;
