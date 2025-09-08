@@ -3,6 +3,12 @@ const Review= require("../models/Review");
 exports.CreateReview = async (req, res) => {
   try {
     const { user, booking, trip, serviceType, serviceId, rating, title, comment } = req.body;
+     if (booking) {
+      const existingReview = await Review.findOne({ user, booking });
+      if (existingReview) {
+        return res.status(400).json({ error: "You already reviewed this booking" });
+      }
+    }
     const review = await Review.create({
       user,
       booking,
@@ -92,6 +98,26 @@ exports.getReviewStats = async (req, res) => {
     const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
     const averageRating = totalReviews ? totalRating / totalReviews : 0;
     res.status(200).json({ data: { totalReviews, averageRating } });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+exports.markReviewHelpful = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const review = await Review.findByIdAndUpdate(
+      id,
+      { $inc: { helpful: 1 } },
+      { new: true }
+    );
+
+    if (!review) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    res.status(200).json({ data: review });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

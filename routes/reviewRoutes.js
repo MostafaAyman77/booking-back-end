@@ -9,7 +9,7 @@ const {
   updateReview,
   deleteReview,
   getReviewStats,
-
+markReviewHelpful
 } = require("../Controllers/reviewController");
 
 // Create a review
@@ -35,6 +35,8 @@ router.put("/:id", updateReview);
 
 // Delete a review
 router.delete("/:id", deleteReview);
+// Mark review as helpful
+router.post("/:id/helpful", markReviewHelpful);
 
 
 module.exports = router;

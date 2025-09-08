@@ -3,12 +3,13 @@ const { check, validationResult } = require("express-validator");
 const slugify = require("slugify");
 const asyncHandler = require('express-async-handler');
 const { v4: uuidv4 } = require('uuid');
-
 const bcrypt = require('bcryptjs');
 
 const factory = require('./handlersFactory');
 const ApiError = require('../utils/apiError');
 const createToken = require("../utils/createToken");
+const sendEmail = require("../utils/sendEmail");
+const crypto = require("crypto");
 
 // ---------------- Get all users ----------------
 // const getUsers = async (req, res, next) => {
@@ -38,6 +39,71 @@ exports.getUser = factory.getOne(User);
 exports.createUser = factory.createOne(User);
 
 // ------------------------------------------- //
+
+// ------------------------------------------- //
+// Send 2FA code to email for password change
+// ------------------------------------------- //
+exports.send2FACode = asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return next(new ApiError("User not found", 404));
+  }
+
+  // Generate random 6-digit code
+  const code = crypto.randomInt(100000, 999999).toString();
+
+  // Save to user with expiry (10 mins)
+  user.twoFactorCode = code;
+  user.twoFactorCodeExpires = Date.now() + 10 * 60 * 1000;
+  await user.save();
+
+  // Send email
+  await sendEmail({
+    email: user.email,
+    subject: "Your 2FA Verification Code",
+    message: `Your password reset verification code is: ${code}\nThis code will expire in 10 minutes.`,
+  });
+
+  res.status(200).json({
+    message: "2FA code sent to your email",
+  });
+});
+
+
+exports.verify2FACodeAndChangePassword = asyncHandler(async (req, res, next) => {
+  const { email, code, newPassword } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return next(new ApiError("User not found", 404));
+  }
+
+
+  if (
+    user.twoFactorCode !== code ||
+    user.twoFactorCodeExpires < Date.now()
+  ) {
+    return next(new ApiError("Invalid or expired code", 400));
+  }
+
+  // Update password
+  user.password = await bcrypt.hash(newPassword, 12);
+  user.passwordChangedAt = Date.now();
+  user.twoFactorCode = undefined;
+  user.twoFactorCodeExpires = undefined;
+  await user.save();
+
+  // Send confirmation email
+  await sendEmail({
+    email: user.email,
+    subject: "Password Changed Successfully",
+    message: "Your password has been updated. If this wasn't you, contact support immediately.",
+  });
+
+  res.status(200).json({ message: "Password changed successfully" });
+});
 
 exports.updateUser = asyncHandler(async (req, res, next) => {
   const document = await User.findByIdAndUpdate(
