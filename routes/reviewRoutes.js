@@ -11,12 +11,17 @@ const {
   getReviewStats,
 markReviewHelpful
 } = require("../Controllers/reviewController");
+const { createReviewValidator } = require("../utils/validators/reviewValidator");
 
 // Create a review
-router.post("/", CreateReview);
+router.post("/", createReviewValidator, CreateReview);
 
 // Get all reviews
 router.get("/", getAllReviews);
+
+
+// Get a single review by id
+router.get("/id/:id", getReviewById);
 
 // Get reviews for a service (trip/hotel/car)
 router.get("/:serviceType/:serviceId", getReviewsForService);
@@ -24,8 +29,6 @@ router.get("/:serviceType/:serviceId", getReviewsForService);
 // Get review stats (average + total)
 router.get("/:serviceType/:serviceId/stats", getReviewStats);
 
-// Get a single review by id
-router.get("/id/:id", getReviewById);
 
 // Get reviews by user
 router.get("/user/:userId", getReviewsByUser);
