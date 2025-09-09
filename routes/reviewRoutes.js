@@ -12,9 +12,13 @@ const {
 markReviewHelpful
 } = require("../Controllers/reviewController");
 const { createReviewValidator } = require("../utils/validators/reviewValidator");
+const { protect } = require("../middlewares/authMiddleware");
+const { checkExistingReview, validateReviewOwnership } = require("../middlewares/reviewsMiddleware");
+
+
 
 // Create a review
-router.post("/", createReviewValidator, CreateReview);
+router.post("/", createReviewValidator, protect, CreateReview);
 
 // Get all reviews
 router.get("/", getAllReviews);
@@ -34,12 +38,13 @@ router.get("/:serviceType/:serviceId/stats", getReviewStats);
 router.get("/user/:userId", getReviewsByUser);
 
 // Update a review
-router.put("/:id", updateReview);
+router.put("/:id", protect, checkExistingReview, validateReviewOwnership, updateReview);
 
 // Delete a review
-router.delete("/:id", deleteReview);
+router.delete("/:id", protect, checkExistingReview, validateReviewOwnership, deleteReview);
+
 // Mark review as helpful
-router.post("/:id/helpful", markReviewHelpful);
+router.post("/:id/helpful", protect, checkExistingReview, markReviewHelpful);
 
 
 module.exports = router;
