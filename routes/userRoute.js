@@ -19,6 +19,8 @@ const {
   updateLoggedUserPassword,
   updateLoggedUserData,
   deleteLoggedUserData,
+  send2FACode,
+  verify2FACodeAndChangePassword
 } = require("../Controllers/userController");
 
 const authService = require("../Controllers/authController");
@@ -65,5 +67,8 @@ router
     deleteUserValidator,
     deleteUser
   );
+// 2FA routes
+router.post("/send-2fa-code", send2FACode);
+router.post("/verify-2fa-code", verify2FACodeAndChangePassword);
 
 module.exports = router;

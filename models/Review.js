@@ -39,8 +39,8 @@ const reviewSchema = new mongoose.Schema(
 reviewSchema.index({ serviceType: 1, serviceId: 1, createdAt: -1 });
 reviewSchema.index({ rating: -1, createdAt: -1 });
 reviewSchema.index({ trip: 1, createdAt: -1 });
-// Optional: prevent duplicate reviews per booking per user
-// reviewSchema.index({ user: 1, booking: 1 }, { unique: true });
+//  prevent duplicate reviews per booking per user
+reviewSchema.index({ user: 1, booking: 1 }, { unique: true });
 
 const Review = mongoose.model("Review", reviewSchema);
 
